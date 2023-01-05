@@ -3,38 +3,24 @@ on:
   push:
     branches: [master]
 jobs:
-  lintTest:
-    name: Lint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Install NPM dependencies and test
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
-        with:
-          node-version: ${{ matrix.node-version }}
-        run: |
-          npm install
-          npm run lint
-        env:
-          CI: true
-  buildWebsite:
+  build:
     runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [16.x]
     steps:
-      - name: Install NPM dependencies and build
       - uses: actions/checkout@v2
       - uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
+      - name: Install NPM dependencies and build
         run: |
           npm install
           npm run build
         env:
           CI: true
-  deployWebsite:
-    needs: [lintTest, buildWebsite]
+  deploy:
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
       - name: SSH Deploy
