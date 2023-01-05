@@ -3,11 +3,9 @@ on:
   push:
     branches: [master]
 jobs:
-  test-website:
+  lintTest:
+    name: Lint
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        node-version: [16.x]
     steps:
       - name: Install NPM dependencies and test
       - uses: actions/checkout@v2
@@ -17,7 +15,9 @@ jobs:
         run: |
           npm install
           npm run lint
-  build-website:
+        env:
+          CI: true
+  buildWebsite:
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -33,8 +33,8 @@ jobs:
           npm run build
         env:
           CI: true
-  deploy-website:
-    needs: [test-website, build-website]
+  deployWebsite:
+    needs: [lintTest, buildWebsite]
     runs-on: ubuntu-latest
     steps:
       - name: SSH Deploy
