@@ -56,11 +56,11 @@ jobs:
           key: ${{ secrets.KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            cd /var/www/html/nextjs-ci-cd
+            cd /var/www/html/nextjs-ci-cd-staging
             git config core.fileMode false
             git clean -f
             git reset --hard
             git pull origin staging
             npm install
             npm run build
-            pm2 reload 0
+            pm2 reload 1
