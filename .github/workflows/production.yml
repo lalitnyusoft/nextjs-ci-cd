@@ -23,6 +23,7 @@ jobs:
         env:
           CI: true
   build:
+    needs: [test]
     name: Build Website
     runs-on: ubuntu-latest
     strategy:
