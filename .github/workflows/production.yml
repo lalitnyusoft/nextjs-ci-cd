@@ -42,7 +42,7 @@ jobs:
         env:
           CI: true
   deploy:
-    needs: [build]
+    needs: [test, build]
     name: Deploy Website
     runs-on: ubuntu-latest
     steps:
