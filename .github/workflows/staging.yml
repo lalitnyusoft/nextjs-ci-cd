@@ -1,0 +1,66 @@
+name: Staging Workflow
+on:
+  push:
+    branches: [staging]
+jobs:
+  test:
+    name: Test Website
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install NPM dependencies
+        run: npm install
+      - name: Formatting and linting
+        run: |
+          npm run lint
+        env:
+          CI: true
+  build:
+    needs: [test]
+    name: Build Website
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [16.x]
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node-version }}
+      - name: Install NPM dependencies
+        run: npm install
+      - name: Build staging website
+        run: npm run build --if-present
+        env:
+          CI: true
+  deploy:
+    needs: [test, build]
+    name: Deploy Website
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy with SSH
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USER }}
+          key: ${{ secrets.KEY }}
+          port: ${{ secrets.PORT }}
+          script: |
+            cd /var/www/html/nextjs-ci-cd
+            git config core.fileMode false
+            git clean -f
+            git reset --hard
+            git pull origin staging
+            npm install
+            npm run build
+            pm2 reload 0
